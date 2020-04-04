@@ -8,21 +8,21 @@ export default class MessageScreen extends Component {
   constructor(props) {
     super(props);
 
-    this.renderAvatar = this.renderAvatar.bind(this);
     //this.renderTime = this.renderTime.bind(this);
   }
   state = {
     user: {},
     loading: true,
     messages: [],
-    message: {}
+    message: {},
   };
 
   get user() {
     if (this.state.loading === false) {
       return {
         _id: Fire.shared.uid,
-        name: this.state.user.name
+        name: this.state.user.name,
+        avatar: this.state.user.avatar,
         //name: this.props.navigation.state.params.name
       };
     }
@@ -37,17 +37,17 @@ export default class MessageScreen extends Component {
       .collection("users")
       .doc(user)
       .onSnapshot(
-        doc => {
+        (doc) => {
           this.setState({ user: doc.data(), loading: false });
         },
-        error => {
+        (error) => {
           alert(error.message);
         }
       );
 
-    Fire.shared.get(message =>
-      this.setState(previousState => ({
-        messages: GiftedChat.append(previousState.messages, message)
+    Fire.shared.get((message) =>
+      this.setState((previousState) => ({
+        messages: GiftedChat.append(previousState.messages, message),
       }))
     );
   }
@@ -63,40 +63,30 @@ export default class MessageScreen extends Component {
         {...props}
         wrapperStyle={{
           right: {
-            backgroundColor: "#038887"
+            backgroundColor: "#038887",
           },
           left: {
-            backgroundColor: "white"
-          }
+            backgroundColor: "white",
+          },
         }}
         textStyle={{
           right: {
-            color: "white"
+            color: "white",
           },
           left: {
-            color: "black"
-          }
+            color: "black",
+          },
         }}
-      />
-    );
-  }
-  //needs some work, get users for each message and their avatars...
-  renderAvatar(props) {
-    return (
-      <Image
-        style={styles.avatar}
-        source={this.state.user.avatar ? { uri: this.state.user.avatar } : require("../assets/icon.png")}
       />
     );
   }
 
   renderTime(props) {
-    console.log("hi time");
-    return <Time {...props} />;
+    return <Time {...props} timeTextStyle={{ left: { color: "#038887" }, right: { color: "yellow" } }} />;
   }
 
   renderDay(props) {
-    return <Day {...props} />;
+    return <Day {...props} textStyle={{ color: "#ab0000" }} />;
   }
 
   render() {
@@ -106,13 +96,11 @@ export default class MessageScreen extends Component {
         onSend={Fire.shared.send}
         user={this.user}
         showUserAvatar={true}
+        showAvatarForEveryMessage={true}
         renderUsernameOnMessage={true}
         renderBubble={this.renderBubble}
-        //renderMessage={this.renderMessage}
         renderTime={this.renderTime}
-        //renderDay={this.renderDay}
-        //timeTextStyle={{ left: { color: "red" }, right: { color: "yellow" } }}
-        // needs some work --> renderAvatar={this.renderAvatar}
+        renderDay={this.renderDay}
       />
     );
 
@@ -142,6 +130,6 @@ const styles = StyleSheet.create({
   avatar: {
     width: 20,
     height: 20,
-    borderRadius: 16
-  }
+    borderRadius: 16,
+  },
 });

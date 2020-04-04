@@ -9,12 +9,12 @@ class Fire {
   }
 
   checkAuth = () => {
-    firebase.auth().onAuthStateChanged(user => {
+    firebase.auth().onAuthStateChanged((user) => {
       if (!user) {
         firebase
           .auth()
           .signInAnonymously()
-          .catch(function(error) {
+          .catch(function (error) {
             alert(error.message);
           });
       }
@@ -25,36 +25,36 @@ class Fire {
     return firebase.database.ServerValue.TIMESTAMP;
   }
 
-  send = messages => {
+  send = (messages) => {
     for (let i = 0; i < messages.length; i++) {
       const { text, user } = messages[i];
       const message = {
         text,
         user,
-        timestamp: this.timestamp
+        timestamp: this.timestamp,
       };
 
       this.append(message);
     }
   };
 
-  append = message => this.db.push(message);
+  append = (message) => this.db.push(message);
 
-  parse = message => {
-    const { timestamp: createdAt, text, user } = message.val();
+  parse = (message) => {
+    const { timestamp, text, user } = message.val();
     const { key: _id } = message;
-    const timestamp = new Date(createdAt);
+    const createdAt = new Date(timestamp);
 
     return {
       _id,
-      timestamp,
+      createdAt,
       text,
-      user
+      user,
     };
   };
 
-  get = callback => {
-    this.db.limitToLast(20).on("child_added", snapshot => callback(this.parse(snapshot)));
+  get = (callback) => {
+    this.db.limitToLast(20).on("child_added", (snapshot) => callback(this.parse(snapshot)));
   };
 
   off() {
@@ -80,12 +80,12 @@ class Fire {
           text,
           uid: this.uid,
           timestamp: this.timestamp,
-          image: remoteUri
+          image: remoteUri,
         })
-        .then(ref => {
+        .then((ref) => {
           res(ref);
         })
-        .catch(error => {
+        .catch((error) => {
           rej(error);
         });
     });
@@ -96,15 +96,12 @@ class Fire {
       const response = await fetch(uri);
       const file = await response.blob();
 
-      let upload = firebase
-        .storage()
-        .ref(filename)
-        .put(file);
+      let upload = firebase.storage().ref(filename).put(file);
 
       upload.on(
         "state_changed",
-        snapshot => {},
-        err => {
+        (snapshot) => {},
+        (err) => {
           rej(err);
         },
         async () => {
@@ -115,14 +112,14 @@ class Fire {
     });
   };
 
-  createUser = async user => {
+  createUser = async (user) => {
     let remoteUri = null;
 
     try {
       await firebase
         .auth()
         .createUserWithEmailAndPassword(user.email, user.password)
-        .catch(error => {
+        .catch((error) => {
           alert(error.message);
         });
 
@@ -131,7 +128,7 @@ class Fire {
       db.set({
         name: user.name,
         email: user.email,
-        avatar: null
+        avatar: null,
       });
 
       if (user.avatar) {
