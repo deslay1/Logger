@@ -71,7 +71,11 @@ class Fire {
   }
 
   addPost = async ({ text, localUri }) => {
-    const remoteUri = await this.uploadPhotoAsync(localUri, `photos/${this.uid}/${Date.now()}`);
+    const remoteUri = null;
+
+    if (localUri !== null) {
+      remoteUri = await this.uploadPhotoAsync(localUri, `photos/${this.uid}/${Date.now()}`);
+    }
 
     return new Promise((res, rej) => {
       this.firestore

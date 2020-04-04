@@ -106,9 +106,14 @@ export default class MessageScreen extends Component {
 
     if (Platform.OS === "android") {
       return (
-        <KeyboardAvoidingView style={{ flex: 1 }} behaviour="padding" keyboardVerticalOffset={30} enabled>
-          {chat}
-        </KeyboardAvoidingView>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Global Chat</Text>
+          </View>
+          <KeyboardAvoidingView style={{ flex: 1 }} behaviour="padding" keyboardVerticalOffset={30} enabled>
+            {chat}
+          </KeyboardAvoidingView>
+        </View>
       );
     }
     {
@@ -118,18 +123,42 @@ export default class MessageScreen extends Component {
         </View> */
     }
     return (
-      <SafeAreaView style={{ flex: 1 }}>
-        {chat}
-        <KeyboardSpacer />
-      </SafeAreaView>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Global Chat</Text>
+        </View>
+        <SafeAreaView style={{ flex: 1 }}>
+          {chat}
+          <KeyboardSpacer />
+        </SafeAreaView>
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  avatar: {
-    width: 20,
-    height: 20,
-    borderRadius: 16,
+  container: {
+    flex: 1,
+    backgroundColor: "#EFECF4",
+  },
+  header: {
+    paddingTop: 32,
+    paddingBottom: 8,
+    backgroundColor: "#FFF",
+    alignItems: "center",
+    justifyContent: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EBECF4",
+    shadowColor: "#454D65",
+    shadowOffset: { height: 5 },
+    shadowRadius: 8,
+    shadowOpacity: 0.4,
+    elevation: 10,
+    zIndex: 2,
+  },
+  headerTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#038887",
   },
 });

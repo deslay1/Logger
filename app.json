@@ -27,7 +27,8 @@
       "supportsTablet": true
     },
     "entryPoint": "node_modules/expo/AppEntry.js",
-    "description": ""
+    "description": "Basic communication/social app.\nFeatures to be added continuously.",
+    "githubUrl": "https://github.com/deslay1/Logger"
   },
   "displayName": "Logger",
   "name": "logger"

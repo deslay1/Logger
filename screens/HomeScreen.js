@@ -9,13 +9,35 @@ const firebase = require("firebase");
 require("firebase/firestore");
 
 export default class HomeScreen extends Component {
+  constructor(props) {
+    super(props);
+  }
+
   state = {
     posts: [],
-    isLoading: false
+    isLoading: true,
   };
 
   componentDidMount() {
     this.getPosts();
+  }
+
+  getUsers() {
+    for (let i = 0; i < this.state.posts.length; i++) {
+      Fire.shared.firestore
+        .collection("users")
+        .doc(this.state.posts[i].uid)
+        .onSnapshot(
+          (doc) => {
+            let posts = [...this.state.posts];
+            posts[i].user = doc.data();
+            this.setState({ posts });
+          },
+          (error) => {
+            alert(error.message);
+          }
+        );
+    }
   }
 
   async getPosts() {
@@ -24,15 +46,17 @@ export default class HomeScreen extends Component {
       .firestore()
       .collection("posts")
       .get()
-      .then(Snapshot => {
-        Snapshot.docs.forEach(doc => {
+      .then((Snapshot) => {
+        Snapshot.docs.forEach((doc) => {
           //this.setState({ posts: [...this.state.posts, doc.data()] });
-          const { image, text, timestamp } = doc.data();
+          const { image, text, timestamp, uid } = doc.data();
           temp.push({
             id: doc.id,
             image,
             text,
-            timestamp
+            timestamp,
+            uid,
+            user: {},
           });
         });
 
@@ -42,25 +66,32 @@ export default class HomeScreen extends Component {
         this.setState({ isLoading: false });
         //}
       })
-      .catch(error => {
+      .catch((error) => {
         alert(error.message);
       });
+
+    this.getUsers();
   }
 
   onRefresh() {
-    this.setState({ isLoading: true }, function() {
+    this.setState({ isLoading: true }, function () {
       this.getPosts();
     });
   }
 
-  renderPost = post => {
+  renderPost = (post) => {
     return (
       <View style={styles.feedItem}>
-        <Image source={post.avatar} style={styles.avatar} />
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
             <View>
-              <Text style={styles.name}>{post.name}</Text>
+              <View style={styles.userDetails}>
+                <Image
+                  source={post.user.avatar ? { uri: post.user.avatar } : require("../assets/icon.png")}
+                  style={styles.avatar}
+                />
+                <Text style={styles.name}>{post.user.name}</Text>
+              </View>
               <Text style={styles.timestamp}>{moment(post.timestamp).fromNow()}</Text>
             </View>
 
@@ -68,8 +99,7 @@ export default class HomeScreen extends Component {
           </View>
 
           <Text style={styles.post}>{post.text}</Text>
-
-          <Image source={{ uri: post.image }} style={styles.postImage} resizeMode="cover" />
+          {post.image !== null && <Image source={{ uri: post.image }} style={styles.postImage} resizeMode="cover" />}
 
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <Ionicons name="ios-heart-empty" size={24} color="#78788B" style={styles.icon}></Ionicons>
@@ -94,7 +124,7 @@ export default class HomeScreen extends Component {
           renderItem={({ item }) => this.renderPost(item)}
           onRefresh={() => this.onRefresh()}
           refreshing={this.state.isLoading}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}></FlatList>
       </View>
     );
@@ -104,11 +134,12 @@ export default class HomeScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EFECF4"
+    backgroundColor: "#EFECF4",
   },
   header: {
     paddingTop: 40,
     paddingBottom: 16,
+    marginBottom: 8,
     backgroundColor: "#FFF",
     alignItems: "center",
     justifyContent: "center",
@@ -119,50 +150,58 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOpacity: 0.4,
     elevation: 10,
-    zIndex: 2
+    zIndex: 2,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   feed: {
-    marginHorizontal: 16
+    marginHorizontal: 16,
   },
   feedItem: {
     backgroundColor: "#FFF",
     borderRadius: 5,
     padding: 8,
     flexDirection: "row",
-    marginVertical: 8
+    marginVertical: 8,
+    borderWidth: 2,
+    borderColor: "#038887",
+  },
+  userDetails: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   avatar: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    marginRight: 16
+    marginRight: 8,
   },
   name: {
     fontSize: 14,
-    fontWeight: "bold",
-    color: "#454D65"
+    fontWeight: "400",
+    color: "#454D65",
   },
   timestamp: {
     fontSize: 10,
     color: "#C4C6CE",
-    marginTop: 4
+    marginTop: 4,
   },
   post: {
     marginTop: 16,
     fontSize: 14,
-    color: "#838899"
+    color: "#838899",
   },
   postImage: {
     width: undefined,
-    height: 150,
+    height: 200,
     borderRadius: 5,
-    marginVertical: 16
+    marginTop: 16,
   },
   icon: {
-    marginRight: 16
-  }
+    marginTop: 16,
+    marginRight: 16,
+  },
 });
